@@ -1,13 +1,12 @@
 # Import and initialize pygame
-from random import randint
+from random import randint, choice
 import pygame 
 pygame.init()
 
+lanes = [93, 218, 343]
+
 # Configure the screen
 screen = pygame.display.set_mode([500, 500])
-
-# Get the clock
-clock = pygame.time.Clock()
 
 # Game Object class
 class GameObject(pygame.sprite.Sprite):
@@ -37,41 +36,86 @@ class Apple(GameObject):
 
     # Add a new method
     def reset(self):
-        self.x = randint(50, 400)
+        self.x = choice(lanes)
         self.y = -64
 
+class Strawberry(GameObject):
+    def __init__(self):
+        super(Strawberry, self).__init__(0, 0, 'strawberry.png')
+        self.dx = (randint(0, 200) / 100) + 1
+        self.dy = 0
+        self.reset()
+
+    def move(self):
+        self.x += self.dx
+        self.y += self.dy
+        if self.x > 500:
+            self.reset()
+
+    def reset(self):
+        self.x = -64
+        self.y = choice(lanes)
+
 class Player(GameObject):
-  def __init__(self):
-    super(Player, self).__init__(0, 0, 'player.png')
-    self.dx = 0
-    self.dy = 0
-    self.reset()
+    def __init__(self):
+        super(Player, self).__init__(0, 0, 'player.png')
+        self.dx = 0
+        self.dy = 0
+        self.pos_x = 1 # new attribute
+        self.pos_y = 1 # new attribute
+        self.reset()
 
-  def left(self):
-    self.dx -= 100
+    def left(self):
+        if self.pos_x > 0:
+            self.pos_x -= 1
+            self.update_dx_dy()
 
-  def right(self):
-    self.dx += 100
+    def right(self):
+        if self.pos_x < len(lanes) - 1:
+            self.pos_x += 1
+            self.update_dx_dy()
 
-  def up(self):
-    self.dy -= 100
+    def up(self):
+        if self.pos_y > 0:
+            self.pos_y -= 1
+            self.update_dx_dy()
 
-  def down(self):
-    self.dy += 100
+    def down(self):
+        if self.pos_y < len(lanes) - 1:
+            self.pos_y += 1
+            self.update_dx_dy()
 
-  def move(self):
-     self.x -= (self.x - self.dx) * 0.25 
-     self.y -= (self.y - self.dy) * 0.25
+    def move(self):
+        self.x -= (self.x - self.dx) * 0.25 
+        self.y -= (self.y - self.dy) * 0.25
 
-  def reset(self):
-    self.x = 250 - 32
-    self.y = 250 - 32
+    def reset(self):
+        self.x = lanes[self.pos_x]
+        self.y = lanes[self.pos_y]
+        self.dx = self.x
+        self.dy = self.y
+
+    def update_dx_dy(self):
+        self.dx = lanes[self.pos_x]
+        self.dy = lanes[self.pos_y]
+
+# Make a group
+all_sprites = pygame.sprite.Group()
 
 # make an instance of Player
 player = Player()
 
 # Make an instance of Apple
 apple = Apple()
+strawberry = Strawberry()
+
+# Add sprites to group
+all_sprites.add(player)
+all_sprites.add(apple)
+all_sprites.add(strawberry)
+
+# Get the clock
+clock = pygame.time.Clock()
 
 # Create the game loop
 running = True
@@ -93,15 +137,13 @@ while running:
 
     # Clear screen
     screen.fill((255, 255, 255))
-    # Move and render the apple
-    apple.move()
-    apple.render(screen)
-    # Draw player 
-    player.move()
-    player.render(screen)
+    # Move and render Sprites
+    for entity in all_sprites:
+        entity.move()
+        entity.render(screen)
     # Update the window
     pygame.display.flip()
-    # Tick the clock!
+    # Update the window
     clock.tick(60)
 
 
