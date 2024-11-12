@@ -6,7 +6,7 @@ pygame.init()
 lanes = [93, 218, 343]
 
 # Configure the screen
-screen = pygame.display.set_mode([500, 500])
+screen = pygame.display.set_mode([375, 667])
 
 # Game Object
 class GameObject(pygame.sprite.Sprite):
@@ -139,8 +139,26 @@ class Player(GameObject):
         self.dx = lanes[self.pos_x]
         self.dy = lanes[self.pos_y]
 
+class Cloud(GameObject):
+    def __init__(self):
+        super(Cloud, self).__init__(0, 0, choice(['cloud1.png', 'cloud2.png', 'cloud3.png']))
+        self.dx = (randint(50, 150) /100)
+        self.reset()
+
+    def move(self):
+        self.x +=self.dx
+        if self.x > 375:
+            self.reset()
+    
+    def reset(self):
+        self.x = -64
+        self.y = randint(0, 667)
+
 # Make a group
 all_sprites = pygame.sprite.Group()
+
+# cloud group
+cloud_sprites = pygame.sprite.Group()
 
 # make a fruits Group
 fruit_sprites = pygame.sprite.Group()
@@ -154,6 +172,13 @@ fruit_sprites.add(strawberry)
 # make an instance of Player
 player = Player()
 
+
+# instance of Cloud
+cloud1 = Cloud()
+cloud2 = Cloud()
+cloud3 = Cloud()
+all_sprites.add(cloud1, cloud2, cloud3)
+
 # make bomb
 bomb = Bomb()
 
@@ -165,6 +190,8 @@ all_sprites.add(bomb)
 
 # Get the clock
 clock = pygame.time.Clock()
+
+background_color = (150, 180, 200)
 
 # Create the game loop
 running = True
@@ -185,7 +212,7 @@ while running:
                 player.down()
 
     # Clear screen
-    screen.fill((255, 255, 255))
+    screen.fill(background_color)
     # Move and render Sprites
     for entity in all_sprites:
         entity.move()
